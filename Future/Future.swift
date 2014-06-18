@@ -20,28 +20,22 @@ enum FutureResult<T>{
 
 func future<T>(execution : ()->FutureResult<T>)(handler: FutureHandler<T>) {
     var result : FutureResult<T>?
-    var done = false
     dispatch_async(dispatch_get_global_queue(0, 0)) {
         result = execution()
-        done = true
-    }
-    dispatch_async(dispatch_get_global_queue(0, 0)) {
-        while !done {}
         dispatch_async(dispatch_get_main_queue()) {
-        switch handler {
-            case .FulFilled(let fulfilled):
+            switch handler {
+                case .FulFilled(let fulfilled):
                 switch result! {
-                case .Result(let value):
+                    case .Result(let value):
                     fulfilled(value())
-                case .Error : println("can't process error")
+                    case .Error : println("can't process error")
                 }
-            case .Failed(let failed):
+                case .Failed(let failed):
                 switch result! {
-                case .Result: println("can't process result")
-                case .Error(let error) : failed(error())
+                    case .Result: println("can't process result")
+                    case .Error(let error) : failed(error())
                 }
             }
         }
     }
-    
 }
